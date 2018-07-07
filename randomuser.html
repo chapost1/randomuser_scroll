@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <!--jQuery-->
+    <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+    <style>
+        .person-cont {
+            margin: 0 auto;
+            width: 400px;
+            height: 300px;
+            background-color: lightblue;
+            position: relative;
+            border: 1px solid black;
+        }
+
+        .fName {
+            position: absolute;
+            right: 2%;
+        }
+
+        .lName {
+            position: absolute;
+            right: 2%;
+            top: 8%;
+        }
+
+        .email {
+            position: absolute;
+            right: 2%;
+            top: 16%;
+        }
+
+        .gender {
+            position: absolute;
+            right: 2%;
+            top: 24%;
+        }
+
+        .person-cont img {
+            width: 100px;
+            height: 100px;
+            position: absolute;
+            top: 10%;
+            left: 5%;
+        }
+
+        #loading {
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            position: fixed;
+            display: block;
+            opacity: 0.7;
+            background-color: #fff;
+            z-index: 99;
+            text-align: center;
+        }
+
+        #loading-image {
+            position: absolute;
+            top: 50%;
+            transform: translateY(50%);
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+        }
+
+        #loadingUsers {
+            position: relative;
+            left: 50%;
+            transform: translateX(-50%);
+            height: 100px;
+        }
+    </style>
+</head>
+<body id="body">
+    <div id="loading">
+        <img id="loading-image" src="images/ajax-loading.gif" alt="Loading..." />
+    </div>
+</body>
+
+<script>
+    window.onload = (() => {
+        getImages(hideMainLoading = true);
+    });
+    let lastY = $(window).scrollTop();
+    let scrollDelayKeeper = true;
+    $(window).on("scroll", () => {
+        let currY = $(window).scrollTop();
+        // detect if scroll direction is down
+        if (currY > lastY) {
+            // detect when left like 6-7 divs way down
+            let scrollToBottom = $(document).height() - $(window).scrollTop();
+            if ((scrollDelayKeeper) && scrollToBottom <= 2000) {
+                scrollDelayKeeper = false;
+                // when almost finished
+                $('body').append(`<img id="loadingUsers" src="images/loading-animation.gif" alt="loading.."/>`)
+                setTimeout((() => { getImages(); }), 400);
+            };
+        };
+        lastY = currY;
+    });
+
+    function getImages(hideMainLoading = false) {
+        $.getJSON("https://randomuser.me/api/?results=30", function (data) {
+            let users = data.results;
+            $(users).each((i, user)=>{
+                $('body').append(`
+                   <div class="person-cont">
+                     <div class="fName">${user.name.first}</div>
+                     <div class="lName">${user.name.last}</div>
+                     <div class="email">${user.email}</div>
+                     <div class="gender">${user.gender}</div>
+                     <img src="${user.picture.medium}" alt="profile image"/>
+                   </div>`);
+            });
+            $('#loadingUsers').remove();
+            if (hideMainLoading) {
+                $('#loading').hide();
+            };
+        });
+        setTimeout((() => { scrollDelayKeeper = true; }), 5000);
+    };
+
+
+
+</script>
+
+</html>
